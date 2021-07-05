@@ -1,12 +1,13 @@
 import { Module } from '@nestjs/common';
+import { MongooseModule } from '@nestjs/mongoose'
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { UsersModule } from './users/users.module';
-import { AuthService } from './auth/auth.service';
 
 @Module({
-  imports: [UsersModule],
+  imports: [
+    MongooseModule.forRoot('mongodb://localhost:27017/timeline-wall')
+  ],
   controllers: [AppController],
-  providers: [AppService, AuthService],
+  providers: [AppService],
 })
 export class AppModule {}
