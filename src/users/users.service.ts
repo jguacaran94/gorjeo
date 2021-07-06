@@ -1,26 +1,84 @@
-import { Injectable } from '@nestjs/common';
-import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { InjectModel } from '@nestjs/mongoose'
+import { Model, ObjectId } from 'mongoose'
+import * as bcrypt from 'bcrypt'
+import { User } from './user.model'
+
 
 @Injectable()
 export class UsersService {
-  create(createUserDto: CreateUserDto) {
-    return 'This action adds a new user';
+  private users: User[] = []
+
+  constructor(
+    @InjectModel('User') private readonly userModel: Model<User>
+  ) {}
+
+  async create(params: User) {
+    if (!params.name || !params.username || !params.email || !params.password) {
+      return {
+        message: 'Name, username, email, password are required!'
+      }
+    }
+    const passwordPlain = params.password
+    const passwordHash = await bcrypt.hash(passwordPlain, 10)
+    const setUser = new this.userModel({
+      name: params.name,
+      username: params.username,
+      email: params.email,
+      password: passwordHash
+    })
+    const user = await this.userModel.findOne({ name: params.name } && { username: params.username } && { email: params.email })
+    if (user) {
+      return user.id
+    }
+    const result = await setUser.save()
+    return {
+      message: `User ${params.username || params.name || params.email} created successfully!`,
+      result
+    }
   }
 
-  findAll() {
-    return `This action returns all users`;
+  async findAll() {
+    const users = await this.userModel.find().exec()
+    return users as User[]
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} user`;
+  async findUser(id: ObjectId) {
+    const user = await this.findUserById(id)
+    return user
   }
 
-  update(id: number, updateUserDto: UpdateUserDto) {
-    return `This action updates a #${id} user`;
+  async update(id: ObjectId, params: User) {
+    const user = await this.findUserById(id)
+    Object.assign(user, params)
+    const result = await user.save()
+    return {
+      message: `User ${params.username} updated successfully!`,
+      result
+    }
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} user`;
+  async remove(id: ObjectId) {
+    const user = await this.findUserById(id)
+    const toDelete = await this.userModel.deleteOne({ _id: id }).exec()
+    if (toDelete.n === 0) {
+      throw new NotFoundException('Could not find user.')
+    }
+    return {
+      message: `User ${user.username || user.name || user.name} deleted successfully!`
+    }
+  }
+
+  private async findUserById(id: ObjectId) {
+    let user
+    try {
+      user = await this.userModel.findById(id).exec()
+    } catch(error) {
+      throw new NotFoundException('Could not find user.')
+    }
+    if (!user) {
+      throw new NotFoundException('Could not find user.')
+    }
+    return user
   }
 }
