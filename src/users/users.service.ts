@@ -16,7 +16,7 @@ export class UsersService {
   async create(params: User) {
     if (!params.name || !params.username || !params.email || !params.password) {
       return {
-        message: 'Name, username, email, password are required!'
+        message: 'Name, username, email and password are required!'
       }
     }
     const passwordPlain = params.password
@@ -33,7 +33,7 @@ export class UsersService {
     }
     const result = await setUser.save()
     return {
-      message: `User ${params.username || params.name || params.email} created successfully!`,
+      message: `User ${params.username} created successfully!`,
       result
     }
   }
@@ -65,7 +65,7 @@ export class UsersService {
       throw new NotFoundException('Could not find user.')
     }
     return {
-      message: `User ${user.username || user.name || user.name} deleted successfully!`
+      message: `User ${user.username} deleted successfully!`
     }
   }
 
