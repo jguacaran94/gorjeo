@@ -43,8 +43,14 @@ export class UsersService {
     return users as User[]
   }
 
-  async findUser(id: ObjectId) {
-    const user = await this.findUserById(id)
+  async findUser(id?: ObjectId, username?: string) {
+    let user
+    if (id) {
+      user = await this.findUserById(id)
+    }
+    if (username) {
+      user = await this.userModel.findOne({ username: username })
+    }
     return user
   }
 
