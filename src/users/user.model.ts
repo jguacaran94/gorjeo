@@ -4,7 +4,15 @@ export const UserSchema = new mongoose.Schema({
   name: String,
   username: String,
   email: String,
-  password: String
+  password: String,
+  createdAt: {
+    type: Date,
+    default: Date.now
+  },
+  updatedAt: {
+    type: Date,
+    default: Date.now
+  }
 })
 
 export interface User extends mongoose.Document {
@@ -12,4 +20,6 @@ export interface User extends mongoose.Document {
   username: string
   email: string
   password: string
+  createdAt: Date
+  updatedAt: Date
 }

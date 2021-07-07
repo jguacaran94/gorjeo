@@ -2,9 +2,9 @@ import { Controller, Req, Get, Post, Body, Patch, Param, Delete, UseGuards } fro
 import { AuthGuard } from '@nestjs/passport'
 import { Request } from 'express'
 import { ObjectId } from 'mongoose'
-import { UsersService } from './users.service';
 import { LocalAuthGuard } from '../auth/local-auth.guard'
 import { JwtAuthGuard } from '../auth/jwt-auth.guard'
+import { UsersService } from './users.service';
 
 @Controller('users')
 export class UsersController {

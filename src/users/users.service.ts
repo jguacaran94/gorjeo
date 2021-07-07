@@ -57,6 +57,7 @@ export class UsersService {
   async update(id: ObjectId, params: User) {
     const user = await this.findUserById(id)
     Object.assign(user, params)
+    user.updatedAt = Date.now()
     const result = await user.save()
     return {
       message: `User ${params.username} updated successfully!`,
