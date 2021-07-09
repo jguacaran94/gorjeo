@@ -2,7 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose'
 import { Model, ObjectId } from 'mongoose'
 import * as bcrypt from 'bcrypt'
-import { User } from './user.model'
+import { User } from './user.schema'
 
 
 @Injectable()
@@ -54,10 +54,12 @@ export class UsersService {
     return user
   }
 
-  async update(id: ObjectId, params: User) {
+  async update(id: ObjectId, params: User, post?: any, comment?: any) {
     const user = await this.findUserById(id)
     Object.assign(user, params)
     user.updatedAt = Date.now()
+    if (post) user.posts.push(post)
+    if (comment) user.comments.push(comment)
     const result = await user.save()
     return {
       message: `User ${params.username} updated successfully!`,

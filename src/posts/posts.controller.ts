@@ -12,29 +12,47 @@ export class PostsController {
 
   @UseGuards(JwtAuthGuard)
   @Post()
-  create(@Req() req: Request) {
-    return this.postsService.create(req.body);
+  createPost(@Req() req: Request) {
+    return this.postsService.createPost(req.body);
   }
 
   @Get()
-  findAll() {
-    return this.postsService.findAll();
+  findAllPosts() {
+    return this.postsService.findAllPosts();
   }
 
   @Get(':id')
-  findOne(@Param('id') id: ObjectId, @Req() req: Request) {
+  findPost(@Param('id') id: ObjectId, @Req() req: Request) {
     return this.postsService.findPost(id || req.body);
   }
 
   @UseGuards(JwtAuthGuard)
   @Patch(':id')
-  update(@Param('id') id: ObjectId, @Req() req: Request) {
-    return this.postsService.update(id, req.body);
+  updatePost(@Param('id') id: ObjectId, @Req() req: Request) {
+    return this.postsService.updatePost(id, req.body);
   }
 
   @UseGuards(JwtAuthGuard)
   @Delete(':id')
-  remove(@Param('id') id: ObjectId) {
-    return this.postsService.remove(id);
+  removePost(@Param('id') id: ObjectId) {
+    return this.postsService.removePost(id);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post(':id')
+  createComment(@Param('id') id: ObjectId, @Req() req: Request) {
+    return this.postsService.createComment(id, req.body)
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Patch(':postId/comments/:commentId')
+  updateComment(@Param('commentId') commentId: ObjectId, @Req() req: Request) {
+    return this.postsService.updateComment(commentId, req.body)
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Delete(':postId/comments/:commentId')
+  removeComment(@Param('commentId') commentId: ObjectId) {
+    return this.postsService.removeComment(commentId)
   }
 }

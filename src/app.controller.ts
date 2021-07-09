@@ -13,8 +13,8 @@ export class AppController {
   ) {}
 
   @Get()
-  getHello(): string {
-    return this.appService.getHello();
+  getHome(): string {
+    return this.appService.getHome();
   }
 
   @Post('auth/login')
