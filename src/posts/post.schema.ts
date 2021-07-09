@@ -6,14 +6,24 @@ import { Comment } from './comment.schema'
 
 export const PostSchema = new mongoose.Schema({
   body: String,
-  like: {
-    type: Number,
-    default: 0
-  },
-  repost: {
-    type: Number,
-    default: 0
-  },
+  likes: [
+    {
+      like: Boolean,
+      user: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User'
+      }
+    }
+  ],
+  repost: [
+    {
+      repost: Boolean,
+      user: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User'
+      }
+    }
+  ],
   user: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User'
@@ -24,14 +34,6 @@ export const PostSchema = new mongoose.Schema({
       ref: 'Comment'
     }
   ],
-  // createdAt: {
-  //   type: Date,
-  //   default: Date.now
-  // },
-  // updatedAt: {
-  //   type: Date,
-  //   default: Date.now
-  // }
 }, {
   timestamps: true
 })

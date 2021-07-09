@@ -55,4 +55,16 @@ export class PostsController {
   removeComment(@Param('commentId') commentId: ObjectId) {
     return this.postsService.removeComment(commentId)
   }
+
+  @UseGuards(JwtAuthGuard)
+  @Patch(':id/like_post')
+  likePost(@Req() req: Request) {
+    return this.postsService.likePost(req.body)
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Patch(':id/comments/:id/like_comment')
+  likeComment(@Req() req: Request) {
+    // return this.postsService.likeComment(req.body)
+  }
 }

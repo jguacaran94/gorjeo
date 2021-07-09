@@ -27,6 +27,7 @@ export class PostsService {
       body: params.body,
       user: user._id
     })
+    const updateUser = await this.usersService.update(user._id, user, setPost, undefined)
     const result = await setPost.save()
     return {
       message: `${user.username} created a post successfully!`,
@@ -117,6 +118,26 @@ export class PostsService {
     return {
       message: 'Comment deleted successfully!'
     }
+  }
+
+  async likePost(params: any) {
+    const user = await this.usersService.findUser(params.userId)
+    const post = await this.findPostById(params.postId)
+
+    console.log('params: ', params)
+    console.log('user: ', user)
+    console.log('post: ', post)
+  }
+
+  async likeComment(params: any) {
+    const user = await this.usersService.findUser(params.userId)
+    const post = await this.findPostById(params.postId)
+    const comment = await this.findCommentById(params.commentId)
+
+    console.log('params: ', params)
+    console.log('user: ', user)
+    console.log('post: ', post)
+    console.log('comment: ', comment)
   }
 
   private async findPostById(id: ObjectId) {
