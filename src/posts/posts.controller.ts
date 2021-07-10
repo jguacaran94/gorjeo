@@ -23,7 +23,7 @@ export class PostsController {
 
   @Get(':id')
   findPost(@Param('id') id: ObjectId, @Req() req: Request) {
-    return this.postsService.findPost(id || req.body);
+    return this.postsService.findPost(id, req.body);
   }
 
   @UseGuards(JwtAuthGuard)
@@ -45,13 +45,13 @@ export class PostsController {
   }
 
   @UseGuards(JwtAuthGuard)
-  @Patch(':postId/comments/:commentId')
+  @Patch(':id/comments/:commentId')
   updateComment(@Param('commentId') commentId: ObjectId, @Req() req: Request) {
     return this.postsService.updateComment(commentId, req.body)
   }
 
   @UseGuards(JwtAuthGuard)
-  @Delete(':postId/comments/:commentId')
+  @Delete(':id/comments/:commentId')
   removeComment(@Param('commentId') commentId: ObjectId) {
     return this.postsService.removeComment(commentId)
   }
@@ -63,8 +63,8 @@ export class PostsController {
   }
 
   @UseGuards(JwtAuthGuard)
-  @Patch(':id/comments/:id/like_comment')
+  @Patch(':id/comments/:commentId/like_comment')
   likeComment(@Req() req: Request) {
-    // return this.postsService.likeComment(req.body)
+    return this.postsService.likeComment(req.body)
   }
 }

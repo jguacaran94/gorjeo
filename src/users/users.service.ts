@@ -2,7 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose'
 import { Model, ObjectId } from 'mongoose'
 import * as bcrypt from 'bcrypt'
-import { User } from './user.schema'
+import { User, UserDocument } from './user.schema'
 
 
 @Injectable()
@@ -10,7 +10,7 @@ export class UsersService {
   private users: User[] = []
 
   constructor(
-    @InjectModel('User') private readonly userModel: Model<User>
+    @InjectModel(User.name) private readonly userModel: Model<UserDocument>
   ) {}
 
   async create(params: User) {
@@ -33,7 +33,7 @@ export class UsersService {
     }
     const result = await setUser.save()
     return {
-      message: `User ${params.username} created successfully!`,
+      message: `User ${setUser.username} created successfully!`,
       result
     }
   }
@@ -54,18 +54,12 @@ export class UsersService {
     return user
   }
 
-  async update(id: ObjectId, params: User, post?: any, comment?: any) {
+  async update(id: ObjectId, params?: User, post?: any, comment?: any, like?: any) {
     const user = await this.findUserById(id)
     Object.assign(user, params)
-    if (post && !user.posts.includes(post._id)) {
-      user.posts.push(post)
-    }
-    user.updatedAt = Date.now()
-    if (comment) user.comments.push(comment)
-    console.log('user: ', user)
     const result = await user.save()
     return {
-      message: `User ${params.username} updated successfully!`,
+      message: `User ${user.username} updated successfully!`,
       result
     }
   }
@@ -86,10 +80,10 @@ export class UsersService {
     try {
       user = await this.userModel.findById(id).exec()
     } catch(error) {
-      throw new NotFoundException('Could not find user.')
+      throw new NotFoundException(`Could not find user, because: ${error}`)
     }
     if (!user) {
-      throw new NotFoundException('Could not find user.')
+      throw new NotFoundException('Could not find user, because user is ${user}')
     }
     return user
   }

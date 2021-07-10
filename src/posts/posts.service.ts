@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose'
 import { Model, ObjectId } from 'mongoose'
-import { Post } from './post.schema'
+import { Post, PostDocument } from './post.schema'
 import { Comment } from './comment.schema'
 import { UsersService } from '../users/users.service'
 
@@ -11,7 +11,7 @@ export class PostsService {
   private comments: Comment[] = []
 
   constructor(
-    @InjectModel('Post') private readonly postModel: Model<Post>,
+    @InjectModel(Post.name) private readonly postModel: Model<PostDocument>,
     @InjectModel('Comment') private readonly commentModel: Model<Comment>,
     private readonly usersService: UsersService
   ) {}
@@ -27,7 +27,6 @@ export class PostsService {
       body: params.body,
       user: user._id
     })
-    const updateUser = await this.usersService.update(user._id, user, setPost, undefined)
     const result = await setPost.save()
     return {
       message: `${user.username} created a post successfully!`,
@@ -40,25 +39,22 @@ export class PostsService {
     return posts as Post[]
   }
 
-  async findPost(id?: ObjectId, params?: any) {
-    let post
-    if (id) {
-      post = await this.findPostById(id)
-    }
-    if (params) {
-      post = await this.postModel.findOne({ body: params.body }).exec()//.populate({ path: 'comments' }).exec((err, post) => {
-        // post
-      // })
+  async findPost(id: ObjectId, params: any) {
+    const post = await this.findPostById(id)
+    const user = await this.usersService.findUser(post.user)
+    post.user = user
+    if (params.commentId) {
+      const comments = await this.findCommentById(params.commentId)
+      post.comments = comments
+    } else {
+      return post
     }
     return post
   }
 
-  async updatePost(id: ObjectId, params?: Post, comment?: Comment) {
+  async updatePost(id: ObjectId, params?: Post, comment?: Comment, like?: any) {
     const post = await this.findPostById(id)
     Object.assign(post, params)
-    if (comment) {
-      post.comments.push(comment)
-    }
     const result = await post.save()
     return {
       message: 'Post updated successfully!',
@@ -90,8 +86,6 @@ export class PostsService {
       user: user._id,
       post: post._id
     })
-    const updateUser = await this.usersService.update(user._id, user, post, setComment)
-    const updatePost = await this.updatePost(postId, undefined, setComment)
     const result = await setComment.save()
     return {
       message: `${user.username} commented "${params.body.substr(0, 10)}..." on "${post.body.substr(0, 10)}..." post successfully!`,
@@ -99,7 +93,7 @@ export class PostsService {
     }
   }
 
-  async updateComment(id: ObjectId, params: Comment) {
+  async updateComment(id: ObjectId, params?: Comment, like?: any) {
     const comment = await this.findCommentById(id)
     Object.assign(comment, params)
     const result = await comment.save()
@@ -123,29 +117,43 @@ export class PostsService {
   async likePost(params: any) {
     const user = await this.usersService.findUser(params.userId)
     const post = await this.findPostById(params.postId)
-
-    console.log('params: ', params)
-    console.log('user: ', user)
-    console.log('post: ', post)
+    const setLike = {
+      like: true,
+      user: user._id,
+      likedAt: Date.now()
+    }
+    const updatePost = await this.updatePost(post._id, undefined, undefined, setLike)
+    const updateUser = await this.usersService.update(user._id, undefined, post, undefined, setLike)
+    return {
+      message: `${user.username} liked post!`
+    }
   }
 
   async likeComment(params: any) {
     const user = await this.usersService.findUser(params.userId)
-    const post = await this.findPostById(params.postId)
     const comment = await this.findCommentById(params.commentId)
+    const setLike = {
+      like: true,
+      user: user._id,
+      likedAt: Date.now()
+    }
+    const updateComment = await this.updateComment(comment._id, undefined, setLike)
+    const updateUser = await this.usersService.update(user._id, undefined, undefined, comment, setLike)
+    return {
+      message: `${user.username} liked comment!`
+    }
+  }
 
-    console.log('params: ', params)
-    console.log('user: ', user)
-    console.log('post: ', post)
-    console.log('comment: ', comment)
+  async totalPostLikes(id: ObjectId) {
+    const post = await this.findPostById(id)
+    const totalLikes = post.likes.length
+    return totalLikes
   }
 
   private async findPostById(id: ObjectId) {
     let post
     try {
-      post = await this.postModel.findById(id).exec()//.populate({ path: 'comments' }).exec((err, post) => {
-        // post
-      // })
+      post = await this.postModel.findById(id).populate('user').exec()
     } catch(err) {
       throw new NotFoundException('Could not find post.')
     }
