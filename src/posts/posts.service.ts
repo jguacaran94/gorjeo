@@ -2,17 +2,20 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose'
 import { Model, ObjectId } from 'mongoose'
 import { Post, PostDocument } from './post.schema'
-import { Comment } from './comment.schema'
+import { Comment, CommentDocument } from './comment.schema'
 import { UsersService } from '../users/users.service'
+import { Like, LikeDocument } from './like.schema'
 
 @Injectable()
 export class PostsService {
   private posts: Post[] = []
   private comments: Comment[] = []
+  private likes: Like[] = []
 
   constructor(
     @InjectModel(Post.name) private readonly postModel: Model<PostDocument>,
-    @InjectModel('Comment') private readonly commentModel: Model<Comment>,
+    @InjectModel(Comment.name) private readonly commentModel: Model<CommentDocument>,
+    @InjectModel(Like.name) private readonly likeModel: Model<LikeDocument>,
     private readonly usersService: UsersService
   ) {}
 
@@ -114,52 +117,67 @@ export class PostsService {
     }
   }
 
-  async likePost(params: any) {
+  async likePost(id: ObjectId, params: any) {
     const user = await this.usersService.findUser(params.userId)
-    const post = await this.findPostById(params.postId)
-    const setLike = {
-      like: true,
-      user: user._id,
-      likedAt: Date.now()
-    }
-    const updatePost = await this.updatePost(post._id, undefined, undefined, setLike)
-    const updateUser = await this.usersService.update(user._id, undefined, post, undefined, setLike)
-    return {
-      message: `${user.username} liked post!`
-    }
-  }
-
-  async likeComment(params: any) {
-    const user = await this.usersService.findUser(params.userId)
-    const comment = await this.findCommentById(params.commentId)
-    const setLike = {
-      like: true,
-      user: user._id,
-      likedAt: Date.now()
-    }
-    const updateComment = await this.updateComment(comment._id, undefined, setLike)
-    const updateUser = await this.usersService.update(user._id, undefined, undefined, comment, setLike)
-    return {
-      message: `${user.username} liked comment!`
-    }
-  }
-
-  async totalPostLikes(id: ObjectId) {
     const post = await this.findPostById(id)
-    const totalLikes = post.likes.length
-    return totalLikes
+    const findLike = await this.likeModel.findOne({ user: user._id, post: post._id })
+    if (findLike) {
+      return findLike.id
+    }
+    const setLike = new this.likeModel({
+      user: user._id,
+      post: post._id
+    })
+    const result = await setLike.save()
+    return {
+      message: `${user.username} liked post!`,
+      result
+    }
+  }
+
+  async likeComment(id: ObjectId, params: any) {
+    const user = await this.usersService.findUser(params.userId)
+    const comment = await this.findCommentById(id)
+    const findLike = await this.likeModel.findOne({ user: user._id, comment: comment._id })
+    if (findLike) {
+      return findLike.id
+    }
+    const setLike = new this.likeModel({
+      user: user._id,
+      comment: comment._id
+    })
+    const result = await setLike.save()
+    return {
+      message: `${user.username} liked comment!`,
+      result
+    }
+  }
+
+  async totalPostLikes(id: ObjectId, params: any) {
+    const likes = await this.findPostLikes(id, params.string)
+    return {
+      total: likes.length,
+      likes
+    }
+  }
+
+  async totalCommentLikes(id: ObjectId, params: any) {
+    const likes = await this.findCommentLikes(id, params.string)
+    return {
+      total: likes.length,
+      likes
+    }
   }
 
   private async findPostById(id: ObjectId) {
+    console.log(id)
     let post
     try {
-      post = await this.postModel.findById(id).populate('user').exec()
+      post = await this.postModel.findById(id).exec()
     } catch(err) {
-      throw new NotFoundException('Could not find post.')
+      throw new NotFoundException(`Could not find post, because: ${err}`)
     }
-    if (!post) {
-      throw new NotFoundException('Could not find post.')
-    }
+    if (!post) throw new NotFoundException(`Could not find post, because post is ${post}`)
     return post
   }
 
@@ -168,11 +186,35 @@ export class PostsService {
     try {
       comment = await this.commentModel.findById(id).exec()
     } catch(err) {
-      throw new NotFoundException('Could not find comment.')
+      throw new NotFoundException(`Could not find comment, because: ${err}`)
     }
-    if (!comment) {
-      throw new NotFoundException('Could not find comment.')
-    }
+    if (!comment) throw new NotFoundException(`Could not find comment, because comment is ${comment}`)
     return comment
+  }
+
+  private async findPostLikes(id: ObjectId, params: any) {
+    let like
+    try {
+      const obj = {}
+      obj[params] = id
+      if (params === 'post') like = await this.likeModel.find(obj).exec()
+    } catch(err) {
+      throw new NotFoundException(`Could not find like, because: ${err}`)
+    }
+    if (!like) throw new NotFoundException(`Could not find like, because like is ${like}`)
+    return like
+  }
+
+  private async findCommentLikes(id: ObjectId, params: any) {
+    let like
+    try {
+      const obj = {}
+      obj[params] = id
+      if (params === 'comment') like = await this.likeModel.find(obj).exec()
+    } catch(err) {
+      throw new NotFoundException(`Could not find comment, because: ${err}`)
+    }
+    if (!like) throw new NotFoundException(`Could not find like, because like is ${like}`)
+    return like
   }
 }

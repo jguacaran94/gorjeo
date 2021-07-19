@@ -58,13 +58,25 @@ export class PostsController {
 
   @UseGuards(JwtAuthGuard)
   @Patch(':id/like_post')
-  likePost(@Req() req: Request) {
-    return this.postsService.likePost(req.body)
+  likePost(@Param('id') id: ObjectId, @Req() req: Request) {
+    return this.postsService.likePost(id, req.body)
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get(':id/total_post_likes')
+  totalPostLikes(@Param('id') id: ObjectId, @Req() req: Request) {
+    return this.postsService.totalPostLikes(id, req.body)
   }
 
   @UseGuards(JwtAuthGuard)
   @Patch(':id/comments/:commentId/like_comment')
-  likeComment(@Req() req: Request) {
-    return this.postsService.likeComment(req.body)
+  likeComment(@Param('commentId') commentId: ObjectId, @Req() req: Request) {
+    return this.postsService.likeComment(commentId, req.body)
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get(':id/comments/:commentId/total_comment_likes')
+  totalCommentLikes(@Param('commentId') commentId: ObjectId, @Req() req: Request) {
+    return this.postsService.totalCommentLikes(commentId, req.body)
   }
 }

@@ -5,7 +5,8 @@ import { UsersService } from '../users/users.service'
 import { PostsController } from './posts.controller';
 import { User, UserSchema } from '../users/user.schema'
 import { Post, PostSchema } from './post.schema'
-import { CommentSchema } from './comment.schema'
+import { Comment, CommentSchema } from './comment.schema'
+import { Like, LikeSchema } from './like.schema'
 
 @Module({
   imports: [
@@ -19,8 +20,12 @@ import { CommentSchema } from './comment.schema'
         schema: PostSchema
       },
       {
-        name: 'Comment',
+        name: Comment.name,
         schema: CommentSchema
+      },
+      {
+        name: Like.name,
+        schema: LikeSchema
       }
     ]),
   ],
