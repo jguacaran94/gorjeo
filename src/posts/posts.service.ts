@@ -5,17 +5,20 @@ import { Post, PostDocument } from './post.schema'
 import { Comment, CommentDocument } from './comment.schema'
 import { UsersService } from '../users/users.service'
 import { Like, LikeDocument } from './like.schema'
+import { Repost, RepostDocument } from './repost.schema'
 
 @Injectable()
 export class PostsService {
   private posts: Post[] = []
   private comments: Comment[] = []
   private likes: Like[] = []
+  private reposts: Repost[] = []
 
   constructor(
     @InjectModel(Post.name) private readonly postModel: Model<PostDocument>,
     @InjectModel(Comment.name) private readonly commentModel: Model<CommentDocument>,
     @InjectModel(Like.name) private readonly likeModel: Model<LikeDocument>,
+    @InjectModel(Repost.name) private readonly repostModel: Model<RepostDocument>,
     private readonly usersService: UsersService
   ) {}
 
@@ -139,9 +142,7 @@ export class PostsService {
     const user = await this.usersService.findUser(params.userId)
     const comment = await this.findCommentById(id)
     const findLike = await this.likeModel.findOne({ user: user._id, comment: comment._id })
-    if (findLike) {
-      return findLike.id
-    }
+    if (findLike) return findLike.id
     const setLike = new this.likeModel({
       user: user._id,
       comment: comment._id
@@ -166,6 +167,22 @@ export class PostsService {
     return {
       total: likes.length,
       likes
+    }
+  }
+
+  async createRepost(id: ObjectId, params: any) {
+    const user = await this.usersService.findUser(params.userId)
+    const post = await this.findPostById(id)
+    const findRepost = await this.repostModel.findOne({ user: user._id, post: post._id })
+    if (findRepost) return findRepost.id
+    const setRepost = new this.repostModel({
+      user: user._id,
+      post: post._id
+    })
+    const result = await setRepost.save()
+    return {
+      message: `${user.username} reposted "${post.body.substr(0, 10)}..." successfully!`,
+      result
     }
   }
 

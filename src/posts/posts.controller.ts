@@ -79,4 +79,10 @@ export class PostsController {
   totalCommentLikes(@Param('commentId') commentId: ObjectId, @Req() req: Request) {
     return this.postsService.totalCommentLikes(commentId, req.body)
   }
+
+  @UseGuards(JwtAuthGuard)
+  @Post(':id/repost')
+  createRepost(@Param('id') id: ObjectId, @Req() req: Request) {
+    return this.postsService.createRepost(id, req.body)
+  }
 }

@@ -27,7 +27,7 @@ export class UsersService {
       email: params.email,
       password: passwordHash
     })
-    const user = await this.userModel.findOne({ name: params.name } && { username: params.username } && { email: params.email })
+    const user = await this.userModel.findOne({ name: params.name, username: params.username, email: params.email })
     if (user) {
       return user.id
     }
