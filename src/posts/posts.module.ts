@@ -7,6 +7,7 @@ import { User, UserSchema } from '../users/user.schema'
 import { Post, PostSchema } from './post.schema'
 import { Comment, CommentSchema } from './comment.schema'
 import { Like, LikeSchema } from './like.schema'
+import { Repost, RepostSchema } from './repost.schema'
 
 @Module({
   imports: [
@@ -26,8 +27,12 @@ import { Like, LikeSchema } from './like.schema'
       {
         name: Like.name,
         schema: LikeSchema
+      },
+      {
+        name: Repost.name,
+        schema: RepostSchema
       }
-    ]),
+    ])
   ],
   controllers: [PostsController],
   providers: [

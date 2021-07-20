@@ -11,6 +11,7 @@ import { PostsService } from './posts/posts.service'
 import { Post, PostSchema } from './posts/post.schema'
 import { Comment, CommentSchema } from './posts/comment.schema'
 import { Like, LikeSchema } from './posts/like.schema'
+import { Repost, RepostSchema } from './posts/repost.schema'
 
 @Module({
   imports: [
@@ -31,6 +32,10 @@ import { Like, LikeSchema } from './posts/like.schema'
       {
         name: Like.name,
         schema: LikeSchema
+      },
+      {
+        name: Repost.name,
+        schema: RepostSchema
       }
     ]),
     UsersModule,
