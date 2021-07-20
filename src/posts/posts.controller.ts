@@ -69,6 +69,12 @@ export class PostsController {
   }
 
   @UseGuards(JwtAuthGuard)
+  @Delete(':id/unlike/:postLikeId')
+  unlikePost(@Param('postLikeId') postLikeId: ObjectId) {
+    return this.postsService.unlike(postLikeId)
+  }
+
+  @UseGuards(JwtAuthGuard)
   @Patch(':id/comments/:commentId/like_comment')
   likeComment(@Param('commentId') commentId: ObjectId, @Req() req: Request) {
     return this.postsService.likeComment(commentId, req.body)
@@ -81,8 +87,20 @@ export class PostsController {
   }
 
   @UseGuards(JwtAuthGuard)
+  @Delete(':id/comments/:commentId/unlike/:commentLikeId')
+  unlikeComment(@Param('commentLikeId') commentLikeId: ObjectId) {
+    return this.postsService.unlike(commentLikeId)
+  }
+
+  @UseGuards(JwtAuthGuard)
   @Post(':id/repost')
   createRepost(@Param('id') id: ObjectId, @Req() req: Request) {
-    return this.postsService.createRepost(id, req.body)
+    return this.postsService.repost(id, req.body)
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Delete(':id/repost/:repostId')
+  unrepost(@Param('repostId') repostId: ObjectId) {
+    return this.postsService.unrepost(repostId)
   }
 }
