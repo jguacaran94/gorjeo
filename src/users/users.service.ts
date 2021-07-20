@@ -28,9 +28,7 @@ export class UsersService {
       password: passwordHash
     })
     const user = await this.userModel.findOne({ name: params.name, username: params.username, email: params.email })
-    if (user) {
-      return user.id
-    }
+    if (user) return user.id
     const result = await setUser.save()
     return {
       message: `User ${setUser.username} created successfully!`,
@@ -45,12 +43,8 @@ export class UsersService {
 
   async findUser(id?: ObjectId, username?: string) {
     let user
-    if (id) {
-      user = await this.findUserById(id)
-    }
-    if (username) {
-      user = await this.userModel.findOne({ username: username })
-    }
+    if (id) user = await this.findUserById(id)
+    if (username) user = await this.userModel.findOne({ username: username })
     return user
   }
 
@@ -67,9 +61,7 @@ export class UsersService {
   async remove(id: ObjectId) {
     const user = await this.findUserById(id)
     const toDelete = await this.userModel.deleteOne({ _id: id }).exec()
-    if (toDelete.n === 0) {
-      throw new NotFoundException('Could not find user.')
-    }
+    if (toDelete.n === 0) throw new NotFoundException('Could not find user.')
     return {
       message: `User ${user.username} deleted successfully!`
     }
@@ -82,9 +74,7 @@ export class UsersService {
     } catch(error) {
       throw new NotFoundException(`Could not find user, because: ${error}`)
     }
-    if (!user) {
-      throw new NotFoundException('Could not find user, because user is ${user}')
-    }
+    if (!user) throw new NotFoundException(`Could not find user, because user is ${user}`)
     return user
   }
 }

@@ -69,11 +69,8 @@ export class PostsService {
   }
 
   async removePost(id: ObjectId) {
-    const post = await this.findPostById(id)
     const toDelete = await this.postModel.deleteOne({ _id: id }).exec()
-    if (toDelete.n === 0) {
-      throw new NotFoundException('Could not find post.')
-    }
+    if (toDelete.n === 0) throw new NotFoundException('Could not find post.')
     return {
       message: 'Post deleted successfully!'
     }
@@ -110,7 +107,6 @@ export class PostsService {
   }
 
   async removeComment(id: ObjectId) {
-    const comment = await this.findCommentById(id)
     const toDelete = await this.commentModel.deleteOne({ _id: id }).exec()
     if (toDelete.n === 0) {
       throw new NotFoundException('Could not find comment.')
@@ -124,9 +120,7 @@ export class PostsService {
     const user = await this.usersService.findUser(params.userId)
     const post = await this.findPostById(id)
     const findLike = await this.likeModel.findOne({ user: user._id, post: post._id })
-    if (findLike) {
-      return findLike.id
-    }
+    if (findLike) return findLike.id
     const setLike = new this.likeModel({
       user: user._id,
       post: post._id
@@ -170,7 +164,15 @@ export class PostsService {
     }
   }
 
-  async createRepost(id: ObjectId, params: any) {
+  async unlike(id: ObjectId) {
+    const toDelete = await this.likeModel.deleteOne({ _id: id }).exec()
+    if (toDelete.n === 0) throw new NotFoundException('Could not find like.')
+    return {
+      message: 'Like deleted successfully!'
+    }
+  }
+
+  async repost(id: ObjectId, params: any) {
     const user = await this.usersService.findUser(params.userId)
     const post = await this.findPostById(id)
     const findRepost = await this.repostModel.findOne({ user: user._id, post: post._id })
@@ -186,8 +188,15 @@ export class PostsService {
     }
   }
 
+  async unrepost(id: ObjectId) {
+    const toDelete = await this.repostModel.deleteOne({ _id: id }).exec()
+    if (toDelete.n === 0) throw new NotFoundException('Could not find repost.')
+    return {
+      message: 'Repost deleted successfully!'
+    }
+  }
+
   private async findPostById(id: ObjectId) {
-    console.log(id)
     let post
     try {
       post = await this.postModel.findById(id).exec()
