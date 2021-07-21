@@ -15,7 +15,7 @@ import { Repost, RepostSchema } from './posts/repost.schema'
 
 @Module({
   imports: [
-    MongooseModule.forRoot('mongodb://localhost:27017/timeline-wall'),
+    MongooseModule.forRoot('mongodb://localhost:27017/gorjeo'),
     MongooseModule.forFeature([
       {
         name: User.name,
