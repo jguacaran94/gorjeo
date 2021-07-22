@@ -1,5 +1,7 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose'
+import { ConfigModule } from '@nestjs/config'
+import secretsKey from './config/secrets_key'
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { UsersModule } from './users/users.module';
@@ -15,6 +17,9 @@ import { Repost, RepostSchema } from './posts/repost.schema'
 
 @Module({
   imports: [
+    ConfigModule.forRoot({
+      load: [secretsKey] 
+    }),
     MongooseModule.forRoot('mongodb://localhost:27017/gorjeo'),
     MongooseModule.forFeature([
       {
