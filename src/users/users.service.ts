@@ -1,7 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose'
 import { Model, ObjectId } from 'mongoose'
-import * as bcrypt from 'bcrypt'
 import { User, UserDocument } from './user.schema'
 
 
@@ -19,16 +18,16 @@ export class UsersService {
         message: 'Name, username, email and password are required!'
       }
     }
-    const passwordPlain = params.password
-    const passwordHash = await bcrypt.hash(passwordPlain, 10)
+    const user = await this.userModel.findOne({ username: params.username, email: params.email })
+    if (user) return {
+      message: `The username ${user.username} or email ${user.email} has been taken! Please, try with another.`
+    }
     const setUser = new this.userModel({
       name: params.name,
       username: params.username,
       email: params.email,
-      password: passwordHash
+      password: params.password
     })
-    const user = await this.userModel.findOne({ name: params.name, username: params.username, email: params.email })
-    if (user) return user.id
     const result = await setUser.save()
     return {
       message: `User ${setUser.username} created successfully!`,
@@ -41,10 +40,10 @@ export class UsersService {
     return users as User[]
   }
 
-  async findUser(id?: ObjectId, username?: string) {
+  async findUser(id?: ObjectId, params?: any) {
     let user
     if (id) user = await this.findUserById(id)
-    if (username) user = await this.userModel.findOne({ username: username })
+    if (params) user = await this.userModel.findOne({ username: params.username, email: params.email })
     return user
   }
 
