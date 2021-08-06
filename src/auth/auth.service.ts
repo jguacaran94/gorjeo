@@ -19,7 +19,7 @@ export class AuthService {
   }
 
   async login(user: any) {
-    if (user.username || user.password) {
+    if (user.username && user.password) {
       const payload = {
           username: user.username,
           sub: user.userId
